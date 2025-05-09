@@ -44,3 +44,27 @@ habitvault/
 │   └── server.js
 └── README.md
 ```
+## 🛠️ Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/your-username/lms-project.git
+cd lms-project
+```
+### 2. Install Server Dependencies
+```
+cd server
+npm install
+npm run dev
+```
+
+### 3. Install Client Dependencies
+```
+cd ../client
+npm install
+npm start
+```
+
+## 💬 Contact
+📧 [divyanshipal2808@gmail.com]
