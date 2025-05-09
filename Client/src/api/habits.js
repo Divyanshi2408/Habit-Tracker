@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/habits';
+const API_URL = 'https://habitvault-backend.onrender.com/api/habits';
 
 export const createHabit = async (token, habitData) => {
   const res = await axios.post(API_URL, habitData, {

@@ -1,55 +1,38 @@
 import React from 'react';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from 'chart.js';
-
-// Register chart components
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+import CalendarHeatmap from 'react-calendar-heatmap';
+import 'react-calendar-heatmap/dist/styles.css'; // Default styles
+import '../index.css'; // Your custom styles (if any)
 
 const HabitPerformanceChart = ({ habitData }) => {
-  const dates = habitData.map(log => log.date);
-  const completedDays = habitData.filter(log => log.status === 'completed').length;
-  const missedDays = habitData.filter(log => log.status === 'missed').length;
+  const values = habitData
+    .filter(log => log.date && log.status)
+    .map(log => ({
+      date: log.date,
+      count: log.status === 'completed' ? 1 : log.status === 'missed' ? -1 : 0,
+    }));
 
-  // Chart data
-  const data = {
-    labels: dates,
-    datasets: [
-      {
-        label: 'Completed',
-        data: habitData.map(log => (log.status === 'completed' ? 1 : 0)),
-        backgroundColor: 'green',
-      },
-      {
-        label: 'Missed',
-        data: habitData.map(log => (log.status === 'missed' ? 1 : 0)),
-        backgroundColor: 'red',
-      },
-    ],
-  };
-
-  // Chart options
-  const options = {
-    responsive: true,
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Date',
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Status',
-        },
-        beginAtZero: true,
-      },
-    },
-  };
+  const today = new Date();
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(today.getMonth() - 3);
 
   return (
-    <div>
-      <Bar data={data} options={options} />
+    <div className="p-4">
+      <CalendarHeatmap
+        startDate={threeMonthsAgo}
+        endDate={today}
+        values={values}
+        classForValue={(value) => {
+          if (!value) return 'color-empty';
+          return value.count > 0 ? 'color-github-4' : 'color-github-0';
+        }}
+        tooltipDataAttrs={(value) => {
+          if (!value?.date) return {};
+          return {
+            'data-tip': `${value.date}: ${value.count > 0 ? 'Completed' : 'Missed'}`,
+          };
+        }}
+        showWeekdayLabels
+      />
     </div>
   );
 };

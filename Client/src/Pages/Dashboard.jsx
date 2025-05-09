@@ -1,19 +1,23 @@
+// Updated Dashboard.jsx
 import { useEffect, useState, useContext } from 'react';
-import { createHabit, getHabits, logHabit } from '../api/habits';
+import { createHabit, getHabits, logHabit, deleteHabitLog, editHabit } from '../api/habits';
 import { AuthContext } from '../context/AuthContext';
 import HabitForm from '../Components/HabitForm';
 import HabitList from '../Components/HabitList';
-import HabitPerformanceChart from '../Components/HabitPerformanceChart';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { token, logout } = useContext(AuthContext);
+  const { token, logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [habits, setHabits] = useState([]);
 
   const fetchHabits = async () => {
-    const data = await getHabits(token);
-    setHabits(data);
+    try {
+      const data = await getHabits(token);
+      setHabits(data);
+    } catch (error) {
+      console.error('Failed to fetch habits:', error);
+    }
   };
 
   useEffect(() => {
@@ -22,37 +26,70 @@ const Dashboard = () => {
     } else {
       fetchHabits();
     }
-  }, [token]);
+  }, [token, navigate]);
 
   const handleCreateHabit = async (habitData) => {
-    await createHabit(token, habitData);
-    fetchHabits();
+    try {
+      await createHabit(token, habitData);
+      fetchHabits();
+    } catch (error) {
+      console.error('Failed to create habit:', error);
+    }
   };
 
   const handleLogHabit = async (habitId, status) => {
-    await logHabit(token, habitId, status);
-    fetchHabits();
+    try {
+      await logHabit(token, habitId, status);
+      fetchHabits();
+    } catch (error) {
+      console.error('Failed to log habit:', error);
+    }
+  };
+
+  const handleDeleteHabit = async (habitId) => {
+    try {
+      await deleteHabitLog(token, habitId);
+      fetchHabits();
+    } catch (error) {
+      console.error('Failed to delete habit:', error);
+    }
+  };
+
+  const handleUpdateHabit = async (habitId, updatedData) => {
+    try {
+      await editHabit(token, habitId, updatedData);
+      fetchHabits();
+    } catch (error) {
+      console.error('Failed to update habit:', error);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-100 max-md:flex-col">
       {/* Sidebar */}
-      <div className="w-64 bg-stone-800 text-white p-6 flex flex-col justify-between">
-        <div>
-          <h2 className="text-3xl font-bold mb-8">HabitVault</h2>
+      <div className="w-64 bg-stone-800 text-white p-6 flex flex-col justify-start items-center max-md:justify-between max-md:flex-row max-md:w-full max-md:p-2">
+        {/* <div className='flex flex-col max-md:flex-row max-md:justify-around gap-15 max-md:gap-12 max-sm:gap-5 sm:justify-around'> */}
+          <h2 className="text-3xl font-bold mb-8 max-md:mb-0">HabitVault</h2>
           <button
-            onClick={() => { logout(); navigate('/'); }}
-            className="w-full bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded"
+            onClick={handleLogout}
+            className="w-fit bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded"
           >
             Logout
           </button>
-        </div>
-        <p className="text-sm text-gray-400 mt-10">&copy; 2025 HabitVault</p>
+        {/* </div> */}
+        {/* <p className="text-sm text-gray-400 mt-10 max-md:mt-0">&copy; 2025 HabitVault</p> */}
       </div>
 
       {/* Main Content */}
       <div className="flex-1 p-10 overflow-y-auto">
-        <h1 className="text-4xl font-bold text-stone-800 mb-6">Your Dashboard</h1>
+        <h1 className="text-4xl font-bold text-stone-800 mb-6">
+          {user?.name ? `${user.name}'s Dashboard` : 'Dashboard'}
+        </h1>
 
         {/* Habit Form */}
         <div className="bg-white shadow-md rounded-lg p-6 mb-10">
@@ -60,20 +97,13 @@ const Dashboard = () => {
           <HabitForm onCreate={handleCreateHabit} />
         </div>
 
-        {/* Habit List and Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {habits.length > 0 ? habits.map(habit => (
-            <div key={habit._id} className="bg-white shadow-md rounded-lg p-6">
-              <h3 className="text-xl font-semibold mb-4">{habit.name}</h3>
-              <HabitPerformanceChart habitData={habit.logs} />
-              <div className="mt-4">
-                <HabitList habits={[habit]} onLog={handleLogHabit} fetchHabits={fetchHabits} token={token} />
-              </div>
-            </div>
-          )) : (
-            <p className="text-gray-500 text-lg">No habits created yet. Start building your streaks!</p>
-          )}
-        </div>
+        {/* Habit List */}
+        <HabitList
+          habits={habits}
+          onLog={handleLogHabit}
+          onDelete={handleDeleteHabit}
+          onUpdate={handleUpdateHabit}
+        />
       </div>
     </div>
   );

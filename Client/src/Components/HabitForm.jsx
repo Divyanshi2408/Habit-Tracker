@@ -18,8 +18,21 @@ const HabitForm = ({ onCreate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const targetDays = targetType === 'Custom' ? customDays : targetType;
+    
+    let targetDays;
+    
+    if (targetType === 'Custom') {
+      targetDays = customDays;
+    } else if (targetType === 'Every Day') {
+      targetDays = [...daysOfWeek]; // All 7 days
+    } else if (targetType === 'Weekdays') {
+      targetDays = daysOfWeek.slice(0, 5); // Monday to Friday
+    } else {
+      targetDays = [];
+    }
+  
     onCreate({ name, targetDays, startDate });
+  
     setName('');
     setTargetType('');
     setCustomDays([]);
