@@ -49,7 +49,7 @@ habitvault/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/lms-project.git
+git clone https://github.com/Divyanshi2408/Habit-Tracker.git
 cd lms-project
 ```
 ### 2. Install Server Dependencies
